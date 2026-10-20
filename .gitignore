@@ -1,0 +1,19 @@
+# Virtual environments
+.venv/
+venv/
+
+# Model files — 311 MB, download from the kokoro-onnx release, don't commit
+*.onnx
+voices-v1.0.bin
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Audio output
+*.wav
+*.ogg
+*.mp3
+
+# OS
+.DS_Store
