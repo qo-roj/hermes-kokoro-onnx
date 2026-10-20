@@ -13,8 +13,8 @@ from pathlib import Path
 
 BASE = Path(__file__).resolve().parent
 LANG_BY_PREFIX = {
-    "a": "en-us", "b": "en-gb", "e": "es-es", "f": "fr-fr", "h": "hi-in",
-    "i": "it-it", "j": "ja-jp", "p": "pt-br", "z": "zh",
+    "a": "en-us", "b": "en-gb", "e": "es", "f": "fr-fr", "h": "hi",
+    "i": "it", "j": "ja", "p": "pt-br", "z": "zh",
 }
 
 
@@ -55,7 +55,8 @@ def main() -> int:
     if lang == "zh":
         # espeak backend in kokoro-onnx has no zh; use misaki zh G2P -> phonemes
         from misaki.zh import ZHG2P
-        phonemes, _ = ZHG2P()(text)
+        result = ZHG2P()(text)
+        phonemes = result[0] if isinstance(result, tuple) else result  # misaki returns (phonemes, tokens); older/newer may differ
         audio, sample_rate = kokoro.create(phonemes, voice=args.voice, speed=args.speed, lang="zh", is_phonemes=True)
     else:
         audio, sample_rate = kokoro.create(text, voice=args.voice, speed=args.speed, lang=lang)

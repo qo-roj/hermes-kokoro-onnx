@@ -74,7 +74,8 @@ kokoro-onnx's espeak backend refuses `lang=zh` ("language zh is not supported").
 ## Findings worth knowing
 
 - **fp32 beats int8 on CPU.** The int8 quantized model was ~30% slower *and* lower fidelity on an 8-core x86-64 box. Don't assume quantized = faster on CPU; benchmark both.
-- **kokoro-onnx API drift**: v0.6.1 renamed `KokoroOnnx` → `Kokoro` (same `.create(text, voice, speed, lang) → (audio, sr)`). Check `dir(kokoro_onnx)` before writing code against it.
+- **kokoro-onnx API drift**: v0.6.1 renamed `KokoroOnnx` → `Kokoro` (same `.create(text, voice, speed, lang) → (audio, sr)`). Check `dir(kokoro_onnx)` before writing code against it. Note: kokoro-onnx requires Python `>=3.10,<3.14` — on a Python 3.14 interpreter, pip silently installs the old 0.4.7 line (the pre-rename API), which is exactly why the wrapper's venv pins 3.12.
+- **kokoro-onnx 0.6.1 espeak lang codes are inconsistent**: `en-us`, `en-gb`, `fr-fr`, `pt-br` are accepted long-form, but Spanish/Hindi/Italian/Japanese must be bare (`es`, `hi`, `it`, `ja`) — the long forms crash with `language "es-es" is not supported by the espeak backend`. `zh` isn't supported by espeak at all, which is why Mandarin routes through misaki.
 - Each synthesis is a fresh process: expect ~4 s of ONNX session load per voice note. Sentence-by-sentence streaming (the Mac plugin's approach) would need a persistent server; voice notes don't care.
 - Voice quality varies: Kokoro grades its own voices in `VOICES.md` on the model card — `am_santa` is D- (≈9 min of training data), `af_heart`/`af_bella` are A-/A-. Character-matching a rasp may mean accepting a low grade; check the table before casting voices.
 
