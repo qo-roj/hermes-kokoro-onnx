@@ -26,17 +26,26 @@ def main() -> int:
     ap.add_argument("--out", required=True)
     ap.add_argument("--voice", default="af_heart")
     ap.add_argument("--speed", type=float, default=1.0)
-    ap.add_argument("--model", default="", help="force fp32 or int8")
+    ap.add_argument("--model", default="", choices=["", "fp32", "int8"],
+                    help="force fp32 or int8 (default: fp32 if present, else int8)")
     args = ap.parse_args()
 
-    text = args.text if args.text else Path(args.text_file).read_text(encoding="utf-8").strip()
+    if args.text is not None:
+        text = args.text
+    else:
+        text = Path(args.text_file).read_text(encoding="utf-8")
+    text = text.strip()
     if not text:
-        print("no text to speak", file=sys.stderr)
+        print(f"no text to speak (input was empty: {args.text_file or '--text'})", file=sys.stderr)
         return 1
 
     variant = args.model or ("fp32" if (BASE / "kokoro-v1.0.onnx").exists() else "int8")
     model = BASE / ("kokoro-v1.0.onnx" if variant == "fp32" else "kokoro-v1.0.int8.onnx")
     voices = BASE / "voices-v1.0.bin"
+    for f in (model, voices):
+        if not f.exists():
+            print(f"missing {f} — download it (verify SHA256, see README) and place it next to this script", file=sys.stderr)
+            return 1
 
     import soundfile as sf
     from kokoro_onnx import Kokoro

@@ -30,7 +30,14 @@ cp /path/to/hermes-kokoro-onnx/kokoro_say.py .
 for f in kokoro-v1.0.onnx voices-v1.0.bin; do
   curl -sL -O "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/$f"
 done
+
+# verify against known-good copies (the ones this repo was tested with):
+#   kokoro-v1.0.onnx  beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a
+#   voices-v1.0.bin  bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d
+sha256sum kokoro-v1.0.onnx voices-v1.0.bin
 ```
+
+Notes on the config command: Hermes substitutes the placeholders **shell-quote-aware** (see `render_command_template` in `tools/tts_command_provider.py`), so values containing spaces or metacharacters are quoted — you don't need to add quotes around them. The `{speed}` value must exist though: `speed: 1.0` in the provider config keeps the wrapper's argparse happy. And `uv venv --python 3.12` downloads a managed CPython 3.12 if the host doesn't have one — it doesn't rely on the system interpreter.
 
 Get `kokoro_say.py` from this repo, then configure Hermes:
 
